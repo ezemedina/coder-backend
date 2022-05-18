@@ -1,11 +1,170 @@
-let usuariosIngresados = 0;
 let notaAprobacion = 0;
 let total = 0;
+let cantidad = 0;
 let cursoDictado = "";
 let profesorCurso = "";
 let usuarioPanel = "";
 
 let Alumnos = [];
+
+const formLogin = `
+<div class="d-flex justify-content-center">
+    <form id="ingresoSesion" class=" my-3 ">
+        <h4 class="text-center">Inicio de sesión</h6>
+        <div class="input-group my-3">
+            <span class="input-group-text" id="basic-addon1"><i class="bi bi-file-person"></i></span>
+            <input type="text" class="form-control" placeholder="Usuario" required>
+        </div>
+        <div class="input-group my-3">
+            <span class="input-group-text" id="basic-addon1"><i class="bi bi-key-fill"></i></span>
+            <input type="text" class="form-control" placeholder="Contraseña" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Iniciar sesión</button>
+    </form>
+</div>`;
+
+const formLoginError = `
+<div class="d-flex justify-content-center">
+    <form id="ingresoSesion" class=" my-3 ">
+        <h4 class="text-center">Inicio de sesión</h6>
+        <div class="input-group my-3">
+            <span class="input-group-text" id="basic-addon1"><i class="bi bi-file-person"></i></span>
+            <input type="text" class="form-control" placeholder="Usuario" required>
+        </div>
+        <div class="input-group my-3">
+            <span class="input-group-text" id="basic-addon1"><i class="bi bi-key-fill"></i></span>
+            <input type="text" class="form-control" placeholder="Contraseña" required>
+        </div>
+        <div class="alert alert-danger" role="alert">
+            Usuario o clave incorrecto
+        </div>
+        <button type="submit" class="btn btn-primary">Iniciar sesión</button>
+    </form>
+</div>`;
+
+const mensajeErrorBusquedaAlumnos = `
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <i class="bi bi-exclamation-triangle-fill mx-1 link-warning"></i>
+            <strong class="me-auto">Error de búsqueda</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+            Usted realizo una búsqueda no compatible o vacía.</br>
+            Si quiere realizar la búsqueda por el alumno ingrese ej. Juan Perez.</br>
+        </div>
+    </div>
+</div>`;
+
+const mensajeErrorRegistros = `
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <i class="bi bi-exclamation-triangle-fill mx-1 link-warning"></i>
+            <strong class="me-auto">Error de búsqueda</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+            Usted realizo una búsqueda no compatible o vacía.</br>
+            Si quiere realizar la búsqueda de su hash ej. 1652231502018.</br>
+            Si quiere realizar la búsqueda por el profesor ingrese ej. Juan Perez.</br>
+        </div>
+    </div>
+</div>`;
+
+const mensajeErrorBusquedaProfesor = `
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <i class="bi bi-exclamation-triangle-fill mx-1 link-warning"></i>
+            <strong class="me-auto">Error de búsqueda</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+            Usted realizo una búsqueda no compatible o vacía.</br>
+            Si quiere realizar la búsqueda por nota ingrese la nota ej. 8.</br>
+            Si quiere buscar por nombre y apellido ingreselo ej. Juan Perez.</br>
+        </div>
+    </div>
+</div>`;
+
+const barraDeBusqueda = `
+<div class="d-flex justify-content-end float-end pt-2">
+    <form class="d-flex mx-2" id="busqueda">
+        <input class="form-control me-2" type="search" placeholder="Búsqueda" aria-label="Buscar">
+        <button class="btn btn-outline-success" type="submit">Buscar</button>
+    </form>
+</div>`;
+
+const formAlta = `
+<div class="d-flex justify-content-center" >
+    <form id="formPrincipal" style="width:600px;">
+        <div class="input-group my-3">
+            <span class="input-group-text" id="basic-addon1"><i class="bi bi-clipboard-fill"></i></span>
+            <input type="text" class="form-control" placeholder="Curso" required>
+            <div class="invalid-feedback">
+              Ingrese un curso ej. Javascript
+            </div>
+        </div>
+        <div class="input-group my-3">
+            <span class="input-group-text" id="basic-addon1"><i class="bi bi-file-person"></i></span>
+            <input type="text" class="form-control" placeholder="Profesor" required>
+            <div class="invalid-feedback">
+              Ingrese un nombre valido ej. Juan Perez
+            </div>
+        </div>
+        <div class="input-group my-3">
+            <span class="input-group-text" id="basic-addon1"><i class="bi bi-award"></i></span>
+            <input type="number" class="form-control" placeholder="Nota de aprobación" min=1 required>
+            <div class="invalid-feedback">
+              Ingrese la nota de aprobación
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Enviar</button>
+        <button type="button" class="btn btn-success" id="btnRegistros">Registros</button>
+    </form>
+</div>`
+
+const tablaAlumnos = `
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Nombre</th>
+            <th scope="col">Apellido</th>
+            <th scope="col">Nota</th>
+            <th scope="col">Aprobado</th>
+        </tr>
+    </thead>
+    <tbody id="alumnos">
+    </tbody>
+</table>`;
+
+const tablaRegistros =`
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Fecha Creación</th>
+            <th scope="col">Cantidad Alumnos</th>
+            <th scope="col">Nota Aprobación</th>
+            <th scope="col">Promedio General</th>
+            <th scope="col">Curso</th>
+            <th scope="col">Profesor</th>
+            <th scope="col">Hash</th>
+        </tr>
+    </thead>
+    <tbody id="alumnos"></tbody>
+</table>`;
+
+function tiggerToast(){
+    var toastElList = [].slice.call(document.querySelectorAll('.toast'))
+    var toastList = toastElList.map(function(toastEl) {
+      return new bootstrap.Toast(toastEl)
+    })
+    toastList.forEach(toast => toast.show()) 
+}
 
 class Alumno{
     constructor(arrId, Id,Nombre,Apellido,Nota) {
@@ -43,11 +202,6 @@ function operacion(signo){
 function actualizarNotaAprobacion(cantidad) {
     notaAprobacion = cantidad;
     console.log("Nota de aprobación: " + notaAprobacion);
-}
-
-function actualizarUsuariosIngresados(cantidad) {
-    usuariosIngresados = cantidad;
-    console.log("Cantidad de alumnos ingresados: " + usuariosIngresados);
 }
 
 function actualizarCursoDictado(curso) {
@@ -104,45 +258,14 @@ function chequeoDatos(usuario,clave){
 
 function login() {
     limiparPantalla();
-    DivFormulario.innerHTML = `
-    <form id="ingresoSesion" class="my-3">
-        <div class="form-floating my-3">
-            <input type="text" class="form-control" id="floatNota" placeholder="Nombre de usuario" required>
-            <label for="floatNota">Nombre de usuario</label>
-        </div>
+    DivFormulario.innerHTML = formLogin
+    let formLoginWeb = document.getElementById("ingresoSesion");
 
-        <div class="form-floating my-3">
-            <input type="password" class="form-control" id="floatUsuario" placeholder="Contraseña" required>
-            <label for="floatUsuario">Contraseña</label>
-        </div>
-    
-        <button type="submit" class="btn btn-primary">Iniciar sesión</button>
-    </form>
-    `
-    let formLogin = document.getElementById("ingresoSesion");
-
-    formLogin.addEventListener("submit", (e) => {
+    formLoginWeb.addEventListener("submit", (e) => {
         e.preventDefault();
-        if (chequeoDatos(e.target.children[0].children[0].value,e.target.children[1].children[0].value) === false){
-            DivFormulario.innerHTML = `
-            <form id="ingresoSesion" class="my-3">
-                <div class="form-floating my-3">
-                    <input type="text" class="form-control" id="floatNota" placeholder="Nombre de usuario" required>
-                    <label for="floatNota">Nombre de usuario</label>
-                </div>
-
-                <div class="form-floating my-3">
-                    <input type="password" class="form-control" id="floatUsuario" placeholder="Contraseña" required>
-                    <label for="floatUsuario">Contraseña</label>
-                </div>
-
-                <div class="alert alert-danger" role="alert">
-                    Usuario o clave incorrecto
-                </div>
-            
-                <button type="submit" class="btn btn-primary">Iniciar sesión</button>
-            </form>
-            `
+        console.log(e.target.children[2].children[1].value)
+        if (chequeoDatos(e.target.children[1].children[1].value,e.target.children[2].children[1].value) === false){
+            DivFormulario.innerHTML = formLoginError
         }
         
     });
@@ -170,40 +293,23 @@ function init() {
             <li class="breadcrumb-item active" aria-current="page">Inicio</li>
         </ol>
     </nav>
-    <form id="formPrincipal" class="my-3">
-        <div class="form-floating my-3">
-            <input type="number" class="form-control" id="floatNota" placeholder="Nota de aprobación" min=1 required>
-            <label for="floatNota">Nota de aprobación</label>
-        </div>
-
-        <div class="form-floating my-3">
-            <input type="number" class="form-control" id="floatUsuario" placeholder="Canitdad de alumnos" min=1 required>
-            <label for="floatUsuario">Cantidad de alumnos</label>
-        </div>
-
-        <div class="form-floating my-3">
-            <input type="text" class="form-control" id="floatUsuario" placeholder="Curso" required>
-            <label for="floatUsuario">Curso</label>
-        </div>
-
-        <div class="form-floating my-3">
-            <input type="text" class="form-control" id="floatUsuario" placeholder="Profesor" required>
-            <label for="floatUsuario">Profesor</label>
-        </div>
-    
-        <button type="submit" class="btn btn-primary">Enviar</button>
-        <button type="button" class="btn btn-success" id="btnRegistros">Registros</button>
-    </form>`;
+    <h5 class="py-3" >Ingrese los datos para dar de alta un nuevo registro<h5>
+    ${formAlta}`;
 
     let formularioPrincipal = document.getElementById("formPrincipal");
 
     formularioPrincipal.addEventListener("submit", (e) => {
         e.preventDefault();
-        actualizarNotaAprobacion(parseFloat(e.target.children[0].children[0].value));
-        actualizarUsuariosIngresados(parseFloat(e.target.children[1].children[0].value));
-        actualizarCursoDictado(e.target.children[2].children[0].value);
-        actualizarProfesor(e.target.children[3].children[0].value);
-        datosAlumnos(parseFloat(e.target.children[1].children[0].value));
+        console.log(e.target.children[1].children[1].value)
+        if (/^([a-zA-Z]+ [a-zA-Z]+)$/.test(e.target.children[1].children[1].value)){
+            actualizarNotaAprobacion(parseInt(e.target.children[2].children[1].value));
+            actualizarCursoDictado(e.target.children[0].children[1].value);
+            actualizarProfesor(e.target.children[1].children[1].value);
+            datosAlumnos(0);
+        } else {
+            e.target.children[1].children[1].value = "";
+            formularioPrincipal.classList.add('was-validated')
+        }
     });
 
     let btnRegistros = document.getElementById("btnRegistros");
@@ -220,10 +326,55 @@ function init() {
 
 }
 
-function datosAlumnos(cantidad){
+function anadirAlumno(alumnoNro,datos){
+    cantidad = alumnoNro +1;
+
+    datos.innerHTML = `<h5 class="float-start">Nota de aprobación: ${notaAprobacion}</h5><h5 class="float-end">Cantidad de alumnos: ${cantidad}</h5></br></br>`;
+    datos.innerHTML += `<h5 class="float-start">Curso: ${cursoDictado}</h5><h5 class="float-end">Profesor: ${profesorCurso}</h5></br>`;
+
+    let padreDiv = document.getElementById("Alumnos");
+
+    let div = document.createElement("div");
+    console.log("Impresión formulario alumno:" + cantidad);
+    div.innerHTML = `
+    <h6 class="py-1" >Datos Alumno N°${cantidad}</h6>
+    <div class="row g-2">
+        <div class="col">
+            <div class="input-group my-1">
+                <span class="input-group-text" id="basic-addon1"><i class="bi bi-file-person"></i></span>
+                <input type="text" class="form-control" placeholder="Nombre" required>
+                <div class="invalid-feedback">
+                  Ingrese el nombre ej. Juan
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="input-group my-1">
+                <span class="input-group-text" id="basic-addon1"><i class="bi bi-file-person"></i></span>
+                <input type="text" class="form-control" placeholder="Apellido" required>
+                <div class="invalid-feedback">
+                  Ingrese un apellido ej. Perez
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="input-group my-1">
+                <span class="input-group-text" id="basic-addon1"><i class="bi bi-award"></i></span>
+                <input type="number" class="form-control" placeholder="Nota " min=1 required>
+                <div class="invalid-feedback">
+                  Ingrese la nota
+                </div>
+            </div>
+        </div>
+    </div>`;
+    padreDiv.appendChild(div);
+}
+
+function datosAlumnos(usuariosIngresados){
     if (chequeoOnline() === false){
         login();
     }
+    cantidad = 0;
     DivFormulario.innerHTML = `
     <div class="d-flex justify-content-end float-end pt-2">
         <div class="btn-group">
@@ -241,7 +392,7 @@ function datosAlumnos(cantidad){
             <li class="breadcrumb-item active" aria-current="page">Ingesta de datos</li>
         </ol>
     </nav>
-    <form id="formAlumno" class="my-3"></form>`;
+    <form id="formAlumno" class="my-3 was-validated"></form>`;
 
     let padreAlumnos = document.getElementById("formAlumno");
 
@@ -250,43 +401,27 @@ function datosAlumnos(cantidad){
     p.innerHTML += `<h5 class="float-start">Curso: ${cursoDictado}</h5><h5 class="float-end">Profesor: ${profesorCurso}</h5></br>`;
     padreAlumnos.appendChild(p);
 
-    for (i=1; i <= cantidad; i++){
-        let div = document.createElement("div");
-        console.log("Impresión formulario alumno:" + i);
-        div.innerHTML = `
-        <h5 class="py-1" >Datos Alumno N°${i}</h5>
-        <div class="form-floating my-3">
-            <input type="text" class="form-control" id="floatNombre" placeholder="Nombre" required>
-            <label for="floatNombre">Nombre</label>
-        </div>
-
-        <div class="form-floating my-3">
-            <input type="text" class="form-control" id="floatApellido" placeholder="Apellido" required>
-            <label for="floatApellido">Apellido</label>
-        </div>
-
-        <div class="form-floating my-3">
-            <input type="number" class="form-control" id="floatNota" placeholder="Nota" min=1 required>
-            <label for="floatUsuario">Nota</label>
-        </div>`;
-        padreAlumnos.appendChild(div);
-    }
+    let divForm = document.createElement("div");
+    divForm.innerHTML = `<div id=Alumnos></div>`;
+    padreAlumnos.appendChild(divForm);
 
     let div = document.createElement("div");
-    div.innerHTML = `<button type="submit" class="btn btn-primary">Enviar</button>
-    <button type="button" class="btn btn-danger" id="atrasAlumno">Atras</button>`
+    div.innerHTML = `<button type="button" class="btn btn-secondary my-3" id="btnAniadirAlumno">Añadir Alumno</button>
+    <button type="submit" class="btn btn-primary my-3">Enviar</button>
+    <button type="button" class="btn btn-danger my-3" id="atrasAlumno">Atras</button>`
     padreAlumnos.appendChild(div);
 
     let formularioAlumno = document.getElementById("formAlumno");
 
     formularioAlumno.addEventListener("submit", (e) => {
         e.preventDefault();
-        for (i=1; i <= cantidad; i++){
-            let nombreAlumno = e.target.children[i].children[1].children[0].value;
-            let apellidoAlumno = e.target.children[i].children[2].children[0].value;
-            let notaAlumno = e.target.children[i].children[3].children[0].value;
-            console.log(`Generando alumno ${i}:\n   - Nombre: ${nombreAlumno} \n   - Apellido: ${apellidoAlumno}\n   - Nota: ${notaAlumno}`);
-            Alumnos.push(new Alumno((i-1),i,nombreAlumno,apellidoAlumno,notaAlumno));
+        for (i=0; i <= (cantidad-1); i++){
+            console.log(e.target.children[1].children[0].children[i].children[1].children[1].children[0].children[1].value);
+            let nombreAlumno = e.target.children[1].children[0].children[i].children[1].children[0].children[0].children[1].value;
+            let apellidoAlumno = e.target.children[1].children[0].children[i].children[1].children[1].children[0].children[1].value;
+            let notaAlumno = e.target.children[1].children[0].children[i].children[1].children[2].children[0].children[1].value;
+            console.log(`Generando alumno ${(i+1)}:\n   - Nombre: ${nombreAlumno} \n   - Apellido: ${apellidoAlumno}\n   - Nota: ${notaAlumno}`);
+            Alumnos.push(new Alumno(i,(i+1),nombreAlumno,apellidoAlumno,notaAlumno));
         }
         limiparPantalla();
         tablaResultados();
@@ -296,6 +431,11 @@ function datosAlumnos(cantidad){
     btnAtras.addEventListener("click", (e) => {
         limiparPantalla();
         init();
+    });
+
+    let btnAniadirAlumno = document.getElementById("btnAniadirAlumno");
+    btnAniadirAlumno.addEventListener("click", (e) => {
+        anadirAlumno(cantidad,p);
     });
     
     let vovlerInicio = document.getElementById("vovlerInicio");
@@ -346,20 +486,7 @@ function tablaResultados(){
     padre.appendChild(aprobacion);
 
     let tabla = document.createElement('div');
-    tabla.innerHTML = `
-    <table class="table">
-        <thead>
-            <tr>
-                <th scope="col">#</th>
-                <th scope="col">Nombre</th>
-                <th scope="col">Apellido</th>
-                <th scope="col">Nota</th>
-                <th scope="col">Aprobado</th>
-            </tr>
-        </thead>
-        <tbody id="alumnos">
-        </tbody>
-    </table>`;
+    tabla.innerHTML = tablaAlumnos;
     padre.appendChild(tabla);
 
     let tablaPadre = document.getElementById("alumnos");
@@ -385,7 +512,7 @@ function tablaResultados(){
         tablaPadre.appendChild(tr);
     }
 
-    let promedio = promediar(total,usuariosIngresados).toFixed(2);;
+    let promedio = promediar(total,cantidad).toFixed(2);;
 
     let promedioFinal = document.createElement('div');
     promedioFinal.innerHTML = `
@@ -397,7 +524,7 @@ function tablaResultados(){
     let hash = document.createElement('div');
     hash.innerHTML = `
     </br>
-    <h5 style="font-weight: 300;">Hash:<a href="${window.location.origin}${window.location.pathname}?main&hash=${fechaEpoch}">${fechaEpoch}</a>, guarde esta información para luego realizar la consulta en los reportes </br></br> <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${window.location.origin}${window.location.pathname}?main&hash=${fechaEpoch}"/></h5>`;
+    <h5 style="font-weight: 300;">Hash:<a href="${window.location.origin}${window.location.pathname}?main&hash=${fechaEpoch}">${fechaEpoch}</a>, guarde esta información para luego realizar la consulta en los reportes </br></br> <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${window.location.origin}${window.location.pathname}%3Fmain%26hash=${fechaEpoch}"/></h5>`;
     padre.appendChild(hash);
 
     let btnInicio = document.getElementById("Inicio");
@@ -479,7 +606,7 @@ function obtenerRegistros(){
             </form>
             <div class="btn-group">
                 <button type="button" class="btn btn-danger dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                ${usuarioPanel}
+                    ${usuarioPanel}
                 </button>
                 <ul class="dropdown-menu">
                     <li><a class="dropdown-item" id="btnCerrarSesion">Cerrar sesión</a></li>
@@ -492,40 +619,12 @@ function obtenerRegistros(){
                 <li class="breadcrumb-item active" aria-current="page">Registros</li>
             </ol>
         </nav>
-        <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
-      <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="toast-header">
-            <i class="bi bi-exclamation-triangle-fill mx-1 link-warning"></i>
-            <strong class="me-auto">Error de búsqueda</strong>
-            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-            <div class="toast-body">
-            Usted realizo una búsqueda no compatible o vacía.</br>
-                Si quiere realizar la búsqueda de su hash ej. 1652231502018.</br>
-                Si quiere realizar la búsqueda por el profesor ingrese ej. Juan Perez.</br>
-            </div>
-        </div>
-        </div>
+        ${mensajeErrorRegistros}
         <h5 class="float-start py-3" >Listado de registros<h5></br>`;
         padre.appendChild(mensaje);
 
         let tabla = document.createElement('div');
-        tabla.innerHTML = `
-        <table class="table">
-            <thead>
-                <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">Fecha Creación</th>
-                    <th scope="col">Cantidad Alumnos</th>
-                    <th scope="col">Nota Aprobación</th>
-                    <th scope="col">Promedio General</th>
-                    <th scope="col">Curso</th>
-                    <th scope="col">Profesor</th>
-                    <th scope="col">Hash</th>
-                </tr>
-            </thead>
-            <tbody id="alumnos"></tbody>
-        </table>`;
+        tabla.innerHTML = tablaRegistros;
         padre.appendChild(tabla);
 
         let tablaPadre = document.getElementById("alumnos");
@@ -632,44 +731,15 @@ function imprimirRegistro(registro){
                 <li class="breadcrumb-item active" aria-current="page">${registro}</li>
             </ol>
         </nav>
-        
+        ${mensajeErrorBusquedaProfesor}
         <h5 class="float-start pt-3" >Nota de aprobación: ${informacion[0].notaAprobacion}<h5>
         <h5 class="float-end pt-3">Generado el dia ${fechaImpresion}</h5></br></br>
         <h5 class="float-start " >Curso: ${informacion[0].curso}<h5>
-        <h5 class="float-end ">Profesor: ${informacion[0].profesor}</h5></br></br>
-
-        <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
-          <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="toast-header">
-                <i class="bi bi-exclamation-triangle-fill mx-1 link-warning"></i>
-                <strong class="me-auto">Error de búsqueda</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-            <div class="toast-body">
-              Usted realizo una búsqueda no compatible o vacía.</br>
-              Si quiere realizar la búsqueda de su id ej. id:4.</br>
-              Si quiere realizar la búsqueda por nota ingrese la nota ej. 8.</br>
-              Si quiere buscar por nombre y apellido ingreselo ej. Juan Perez.</br>
-            </div>
-          </div>
-        </div>`;
+        <h5 class="float-end ">Profesor: ${informacion[0].profesor}</h5></br></br>`;
         padre.appendChild(aprobacion);
 
         let tabla = document.createElement('div');
-        tabla.innerHTML = `
-        <table class="table">
-            <thead>
-                <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">Nombre</th>
-                    <th scope="col">Apellido</th>
-                    <th scope="col">Nota</th>
-                    <th scope="col">Aprobado</th>
-                </tr>
-            </thead>
-            <tbody id="alumnos">
-            </tbody>
-        </table>`;
+        tabla.innerHTML = tablaAlumnos;
         padre.appendChild(tabla);
 
         let tablaPadre = document.getElementById("alumnos");
@@ -704,7 +774,7 @@ function imprimirRegistro(registro){
         padre.appendChild(promedioFinal);
 
         let compartir = document.createElement('div');
-        compartir.innerHTML = `<h5 class="my-3" style="font-weight: 300;">Hash: <a href="${window.location.origin}${window.location.pathname}?main&hash=${registro}">${registro}</a>, link para compartir.</br></br> <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${window.location.origin}${window.location.pathname}?main&hash=${registro}"/><h5>`;
+        compartir.innerHTML = `<h5 class="my-3" style="font-weight: 300;">Hash: <a href="${window.location.origin}${window.location.pathname}?main&hash=${registro}">${registro}</a>, link para compartir.</br></br> <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${window.location.origin}${window.location.pathname}%3Fmain%26hash=${registro}"/><h5>`;
         padre.appendChild(compartir);
 
         let btnEliminarReg = document.getElementById("btnEliminarReg");
@@ -792,12 +862,7 @@ function compartirRegistro(registro) {
 
         let aprobacion = document.createElement("p");
         aprobacion.innerHTML = `
-        <div class="d-flex justify-content-end float-end pt-2">
-            <form class="d-flex mx-2" id="busqueda">
-                <input class="form-control me-2" type="search" placeholder="Búsqueda" aria-label="Buscar">
-                <button class="btn btn-outline-success" type="submit">Buscar</button>
-            </form>
-        </div>
+        ${barraDeBusqueda}
         <nav aria-label="breadcrumb" class="pt-3">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item">Inicio</li>
@@ -805,19 +870,7 @@ function compartirRegistro(registro) {
                 <li class="breadcrumb-item active" aria-current="page">${registro}</li>
             </ol>
         </nav>
-        <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
-            <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-                <div class="toast-header">
-                <i class="bi bi-exclamation-triangle-fill mx-1 link-warning"></i>
-                <strong class="me-auto">Error de búsqueda</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-            <div class="toast-body">
-                Usted realizo una búsqueda no compatible o vacía.</br>
-                Si quiere realizar la búsqueda por el alumno ingrese ej. Juan Perez.</br>
-            </div>
-        </div>
-        </div>
+        ${mensajeErrorBusquedaAlumnos}
         <h5 class="float-start pt-3" >Nota de aprobación: ${informacion[0].notaAprobacion}<h5>
         <h5 class="float-end pt-3">Generado el dia ${fechaImpresion}</h5></br></br>
         <h5 class="float-start" >Curso: ${informacion[0].curso}<h5>
@@ -825,20 +878,7 @@ function compartirRegistro(registro) {
         padre.appendChild(aprobacion);
 
         let tabla = document.createElement('div');
-        tabla.innerHTML = `
-        <table class="table">
-            <thead>
-                <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">Nombre</th>
-                    <th scope="col">Apellido</th>
-                    <th scope="col">Nota</th>
-                    <th scope="col">Aprobado</th>
-                </tr>
-            </thead>
-            <tbody id="alumnos">
-            </tbody>
-        </table>`;
+        tabla.innerHTML = tablaAlumnos;
         padre.appendChild(tabla);
 
         let tablaPadre = document.getElementById("alumnos");
@@ -892,11 +932,7 @@ function busquedaProfesor(busqueda,hash) {
         console.log('Búsqueda por Nombre: ' + nombreApellido[0] + ' y Apellido: ' + nombreApellido[1] + " en el registro: " + hash);
         busquedaNombreApellido(nombreApellido,hash);
     }else{
-        var toastElList = [].slice.call(document.querySelectorAll('.toast'))
-        var toastList = toastElList.map(function(toastEl) {
-          return new bootstrap.Toast(toastEl)
-        })
-        toastList.forEach(toast => toast.show())   
+        tiggerToast();  
     }
 }
 
@@ -908,11 +944,7 @@ function busquedaHash(busqueda){
         console.log('Búsqueda por Nombre: ' + nombreApellido[0] + ' y Apellido: ' + nombreApellido[1]);
         imprimirListadoBusquedaNombreProfesor(busqueda);
     } else {
-        var toastElList = [].slice.call(document.querySelectorAll('.toast'))
-        var toastList = toastElList.map(function(toastEl) {
-          return new bootstrap.Toast(toastEl)
-        })
-        toastList.forEach(toast => toast.show()) 
+        tiggerToast(); 
     }
 }
 
@@ -922,11 +954,7 @@ function busquedaAlumno(busqueda,hash){
         console.log('Búsqueda por Nombre: ' + nombreApellido[0] + ' y Apellido: ' + nombreApellido[1]);
         compartirRegistroBusqueda(nombreApellido,hash);
     } else {
-        var toastElList = [].slice.call(document.querySelectorAll('.toast'))
-        var toastList = toastElList.map(function(toastEl) {
-          return new bootstrap.Toast(toastEl)
-        })
-        toastList.forEach(toast => toast.show()) 
+        tiggerToast();
     }
 }
 
@@ -949,12 +977,7 @@ function compartirRegistroBusqueda(busqueda,hash) {
 
     let aprobacion = document.createElement("p");
     aprobacion.innerHTML = `
-    <div class="d-flex justify-content-end float-end pt-2">
-        <form class="d-flex mx-2" id="busqueda">
-            <input class="form-control me-2" type="search" placeholder="Búsqueda" aria-label="Buscar">
-            <button class="btn btn-outline-success" type="submit">Buscar</button>
-        </form>
-    </div>
+    ${barraDeBusqueda}
     <nav aria-label="breadcrumb" class="pt-3">
         <ol class="breadcrumb">
             <li class="breadcrumb-item">Inicio</li>
@@ -970,23 +993,7 @@ function compartirRegistroBusqueda(busqueda,hash) {
             </button>
         </h6>
     </div>
-
-    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
-      <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="toast-header">
-            <i class="bi bi-exclamation-triangle-fill mx-1 link-warning"></i>
-            <strong class="me-auto">Error de búsqueda</strong>
-            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-        <div class="toast-body">
-          Usted realizo una búsqueda no compatible o vacía.</br>
-          Si quiere realizar la búsqueda de su id ej. id:4.</br>
-          Si quiere realizar la búsqueda por nota ingrese la nota ej. 8.</br>
-          Si quiere buscar por nombre y apellido ingreselo ej. Juan Perez.</br>
-        </div>
-      </div>
-    </div>
-    
+    ${mensajeErrorBusquedaAlumnos}
     <h5 class="float-start pt-3" >Nota de aprobación: ${informacion[0].notaAprobacion}<h5>
     <h5 class="float-end pt-3">Generado el dia ${fechaImpresion}</h5></br></br>
     <h5 class="float-start " >Curso: ${informacion[0].curso}<h5>
@@ -1010,20 +1017,7 @@ function compartirRegistroBusqueda(busqueda,hash) {
         });
     }else {
         let tabla = document.createElement('div');
-        tabla.innerHTML = `
-        <table class="table">
-            <thead>
-                <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">Nombre</th>
-                    <th scope="col">Apellido</th>
-                    <th scope="col">Nota</th>
-                    <th scope="col">Aprobado</th>
-                </tr>
-            </thead>
-            <tbody id="alumnos">
-            </tbody>
-        </table>`;
+        tabla.innerHTML = tablaAlumnos;
         padre.appendChild(tabla);
 
         let tablaPadre = document.getElementById("alumnos");
@@ -1125,21 +1119,7 @@ function busquedaNombreApellido(busqueda,hash) {
         </h6>
     </div>
 
-    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
-      <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="toast-header">
-            <i class="bi bi-exclamation-triangle-fill mx-1 link-warning"></i>
-            <strong class="me-auto">Error de búsqueda</strong>
-            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-        <div class="toast-body">
-          Usted realizo una búsqueda no compatible o vacía.</br>
-          Si quiere realizar la búsqueda de su id ej. id:4.</br>
-          Si quiere realizar la búsqueda por nota ingrese la nota ej. 8.</br>
-          Si quiere buscar por nombre y apellido ingreselo ej. Juan Perez.</br>
-        </div>
-      </div>
-    </div>
+    ${mensajeErrorBusquedaProfesor}
     
     <h5 class="float-start pt-3" >Nota de aprobación: ${informacion[0].notaAprobacion}<h5>
     <h5 class="float-end pt-3">Generado el dia ${fechaImpresion}</h5></br></br>
@@ -1164,20 +1144,7 @@ function busquedaNombreApellido(busqueda,hash) {
         });
     }else {
         let tabla = document.createElement('div');
-        tabla.innerHTML = `
-        <table class="table">
-            <thead>
-                <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">Nombre</th>
-                    <th scope="col">Apellido</th>
-                    <th scope="col">Nota</th>
-                    <th scope="col">Aprobado</th>
-                </tr>
-            </thead>
-            <tbody id="alumnos">
-            </tbody>
-        </table>`;
+        tabla.innerHTML = tablaAlumnos;
         padre.appendChild(tabla);
 
         let tablaPadre = document.getElementById("alumnos");
@@ -1210,7 +1177,7 @@ function busquedaNombreApellido(busqueda,hash) {
         padre.appendChild(promedioFinal);
 
         let compartir = document.createElement('div');
-        compartir.innerHTML = `<h5 class="my-3" style="font-weight: 300;">Hash: <a href="${window.location.origin}${window.location.pathname}?main&hash=${hash}">${hash}</a>, link para compartir.</br></br> <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${window.location.origin}${window.location.pathname}?main&hash=${hash}"/><h5>`;
+        compartir.innerHTML = `<h5 class="my-3" style="font-weight: 300;">Hash: <a href="${window.location.origin}${window.location.pathname}?main&hash=${hash}">${hash}</a>, link para compartir.</br></br> <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${window.location.origin}${window.location.pathname}%3Fmain%26hash=${hash}"/><h5>`;
         padre.appendChild(compartir);
 
         let btnEliminarReg = document.getElementById("btnEliminarReg");
@@ -1323,23 +1290,7 @@ function busquedaNota(busqueda,hash) {
             </button>
         </h6>
     </div>
-
-    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
-      <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="toast-header">
-            <i class="bi bi-exclamation-triangle-fill mx-1 link-warning"></i>
-            <strong class="me-auto">Error de búsqueda</strong>
-            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-        <div class="toast-body">
-          Usted realizo una búsqueda no compatible o vacía.</br>
-          Si quiere realizar la búsqueda de su id ej. id:4.</br>
-          Si quiere realizar la búsqueda por nota ingrese la nota ej. 8.</br>
-          Si quiere buscar por nombre y apellido ingreselo ej. Juan Perez.</br>
-        </div>
-      </div>
-    </div>
-    
+    ${mensajeErrorBusquedaProfesor}    
     <h5 class="float-start pt-3" >Nota de aprobación: ${informacion[0].notaAprobacion}<h5>
     <h5 class="float-end pt-3">Generado el dia ${fechaImpresion}</h5></br></br>
     <h5 class="float-start " >Curso: ${informacion[0].curso}<h5>
@@ -1363,20 +1314,7 @@ function busquedaNota(busqueda,hash) {
         });
     }else {
         let tabla = document.createElement('div');
-        tabla.innerHTML = `
-        <table class="table">
-            <thead>
-                <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">Nombre</th>
-                    <th scope="col">Apellido</th>
-                    <th scope="col">Nota</th>
-                    <th scope="col">Aprobado</th>
-                </tr>
-            </thead>
-            <tbody id="alumnos">
-            </tbody>
-        </table>`;
+        tabla.innerHTML = tablaAlumnos;
         padre.appendChild(tabla);
 
         let tablaPadre = document.getElementById("alumnos");
@@ -1409,7 +1347,7 @@ function busquedaNota(busqueda,hash) {
         padre.appendChild(promedioFinal);
 
         let compartir = document.createElement('div');
-        compartir.innerHTML = `<h5 class="my-3" style="font-weight: 300;">Hash: <a href="${window.location.origin}${window.location.pathname}?main&hash=${hash}">${hash}</a>, link para compartir.</br></br> <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${window.location.origin}${window.location.pathname}?main&hash=${hash}"/><h5>`;
+        compartir.innerHTML = `<h5 class="my-3" style="font-weight: 300;">Hash: <a href="${window.location.origin}${window.location.pathname}?main&hash=${hash}">${hash}</a>, link para compartir.</br></br> <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${window.location.origin}${window.location.pathname}%3Fmain%26hash=${hash}"/><h5>`;
         padre.appendChild(compartir);
 
         let btnEliminarReg = document.getElementById("btnEliminarReg");
@@ -1514,7 +1452,7 @@ function imprimirListadoBusqueda(registro){
             </form>
             <div class="btn-group">
                 <button type="button" class="btn btn-danger dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                ${usuarioPanel}
+                    ${usuarioPanel}
                 </button>
                 <ul class="dropdown-menu">
                     <li><a class="dropdown-item" id="btnCerrarSesion">Cerrar sesión</a></li>
@@ -1535,40 +1473,12 @@ function imprimirListadoBusqueda(registro){
             </button>
         </h6>
         </div>
-        <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
-            <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-                <div class="toast-header">
-                <i class="bi bi-exclamation-triangle-fill mx-1 link-warning"></i>
-                <strong class="me-auto">Error de búsqueda</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-            <div class="toast-body">
-                Usted realizo una búsqueda no compatible o vacía.</br>
-                Si quiere realizar la búsqueda de su hash ej. 1652231502018.</br>
-                Si quiere realizar la búsqueda por el profesor ingrese ej. Juan Perez.</br>
-            </div>
-        </div>
-        </div>
+        ${mensajeErrorBusquedaProfesor}
         <h5 class="float-start py-3" >Listado de registros<h5></br>`;
         padre.appendChild(mensaje);
 
         let tabla = document.createElement('div');
-        tabla.innerHTML = `
-        <table class="table">
-            <thead>
-                <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">Fecha Creación</th>
-                    <th scope="col">Cantidad Alumnos</th>
-                    <th scope="col">Nota Aprobación</th>
-                    <th scope="col">Promedio General</th>
-                    <th scope="col">Curso</th>
-                    <th scope="col">Profesor</th>
-                    <th scope="col">Hash</th>
-                </tr>
-            </thead>
-            <tbody id="alumnos"></tbody>
-        </table>`;
+        tabla.innerHTML = tablaRegistros;
         padre.appendChild(tabla);
 
         let tablaPadre = document.getElementById("alumnos");
@@ -1674,7 +1584,7 @@ function imprimirListadoBusquedaNombreProfesor(registro){
             </form>
             <div class="btn-group">
                 <button type="button" class="btn btn-danger dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                ${usuarioPanel}
+                    ${usuarioPanel}
                 </button>
                 <ul class="dropdown-menu">
                     <li><a class="dropdown-item" id="btnCerrarSesion">Cerrar sesión</a></li>
@@ -1695,40 +1605,12 @@ function imprimirListadoBusquedaNombreProfesor(registro){
             </button>
         </h6>
         </div>
-        <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
-            <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-                <div class="toast-header">
-                <i class="bi bi-exclamation-triangle-fill mx-1 link-warning"></i>
-                <strong class="me-auto">Error de búsqueda</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-            <div class="toast-body">
-            Usted realizo una búsqueda no compatible o vacía.</br>
-            Si quiere realizar la búsqueda de su hash ej. 1652231502018.</br>
-            Si quiere realizar la búsqueda por el profesor ingrese ej. Juan Perez.</br>
-            </div>
-        </div>
-        </div>
+        ${mensajeErrorRegistros}
         <h5 class="float-start py-3" >Listado de registros<h5></br>`;
         padre.appendChild(mensaje);
 
         let tabla = document.createElement('div');
-        tabla.innerHTML = `
-        <table class="table">
-            <thead>
-                <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">Fecha Creación</th>
-                    <th scope="col">Cantidad Alumnos</th>
-                    <th scope="col">Nota Aprobación</th>
-                    <th scope="col">Promedio General</th>
-                    <th scope="col">Curso</th>
-                    <th scope="col">Profesor</th>
-                    <th scope="col">Hash</th>
-                </tr>
-            </thead>
-            <tbody id="alumnos"></tbody>
-        </table>`;
+        tabla.innerHTML = tablaRegistros;
         padre.appendChild(tabla);
 
         let tablaPadre = document.getElementById("alumnos");
