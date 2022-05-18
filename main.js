@@ -19,27 +19,14 @@ const formLogin = `
             <span class="input-group-text" id="basic-addon1"><i class="bi bi-key-fill"></i></span>
             <input type="text" class="form-control" placeholder="Contraseña" required>
         </div>
+        <div id="error"></div>
         <button type="submit" class="btn btn-primary">Iniciar sesión</button>
     </form>
 </div>`;
 
 const formLoginError = `
-<div class="d-flex justify-content-center">
-    <form id="ingresoSesion" class=" my-3 ">
-        <h4 class="text-center">Inicio de sesión</h6>
-        <div class="input-group my-3">
-            <span class="input-group-text" id="basic-addon1"><i class="bi bi-file-person"></i></span>
-            <input type="text" class="form-control" placeholder="Usuario" required>
-        </div>
-        <div class="input-group my-3">
-            <span class="input-group-text" id="basic-addon1"><i class="bi bi-key-fill"></i></span>
-            <input type="text" class="form-control" placeholder="Contraseña" required>
-        </div>
-        <div class="alert alert-danger" role="alert">
-            Usuario o clave incorrecto
-        </div>
-        <button type="submit" class="btn btn-primary">Iniciar sesión</button>
-    </form>
+<div class="alert alert-danger" role="alert">
+    Usuario o clave incorrecto
 </div>`;
 
 const mensajeErrorBusquedaAlumnos = `
@@ -231,16 +218,12 @@ function cerrarSesion() {
 }
 
 function chequeoOnline() {
-    let usuario = JSON.parse(sessionStorage.getItem("usuario"));
-    if (usuario === null) {
-        return false;
-    } else if (usuario === []){
-        return false;
-    } else if (usuario[0] === undefined) {
+    let usuarioSesion = JSON.parse(sessionStorage.getItem("usuario")) || [];
+    if (usuarioSesion.length === 0){
         return false;
     } else {
-        usuarioPanel = usuario[0];
-        return true;
+        usuarioPanel = usuarioSesion[0];
+        return true
     }
 }
 
@@ -258,17 +241,17 @@ function chequeoDatos(usuario,clave){
 
 function login() {
     if (chequeoOnline() === false){
+        console.log(chequeoOnline());
         limiparPantalla();
         DivFormulario.innerHTML = formLogin
         let formLoginWeb = document.getElementById("ingresoSesion");
 
         formLoginWeb.addEventListener("submit", (e) => {
             e.preventDefault();
-            console.log(e.target.children[2].children[1].value)
             if (chequeoDatos(e.target.children[1].children[1].value,e.target.children[2].children[1].value) === false){
-                DivFormulario.innerHTML = formLoginError
+                let errorDiv = document.getElementById("error");
+                errorDiv.innerHTML = formLoginError
             }
-
         });
     } else {
         init();
