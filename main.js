@@ -76,6 +76,20 @@ const mensajeErrorBusquedaProfesor = `
     </div>
 </div>`;
 
+const mensajeOkRegistros = `
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <i class="bi bi-check2-circle mx-1 link-success"></i>
+            <strong class="me-auto">Registro añadido</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+            El registro de añadio de manera exitosa.
+        </div>
+    </div>
+</div>`;
+
 const barraDeBusqueda = `
 <div class="d-flex justify-content-end float-end pt-2">
     <form class="d-flex mx-2" id="busqueda">
@@ -468,6 +482,7 @@ function tablaResultados(){
             <li class="breadcrumb-item active" aria-current="page">Reporte</li>
         </ol>
     </nav>
+    ${mensajeOkRegistros}
     <h5 class="float-start pt-3" >Nota de aprobación: ${notaAprobacion}</h5>
     <h5 class="float-end pt-3">Generado el dia ${fechaImpresion}</h5></br></br>`;
     aprobacion.innerHTML += `<h5 class="float-start">Curso: ${cursoDictado}</h5><h5 class="float-end">Profesor: ${profesorCurso}</h5></br>`
@@ -514,6 +529,8 @@ function tablaResultados(){
     </br>
     <h5 style="font-weight: 300;">Hash:<a href="${window.location.origin}${window.location.pathname}?main&hash=${fechaEpoch}">${fechaEpoch}</a>, guarde esta información para luego realizar la consulta en los reportes </br></br> <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${window.location.origin}${window.location.pathname}%3Fmain%26hash=${fechaEpoch}"/></h5>`;
     padre.appendChild(hash);
+
+    tiggerToast();
 
     let btnInicio = document.getElementById("Inicio");
     btnInicio.addEventListener("click", (e) => {
