@@ -257,18 +257,23 @@ function chequeoDatos(usuario,clave){
 }
 
 function login() {
-    limiparPantalla();
-    DivFormulario.innerHTML = formLogin
-    let formLoginWeb = document.getElementById("ingresoSesion");
+    if (chequeoOnline() === false){
+        limiparPantalla();
+        DivFormulario.innerHTML = formLogin
+        let formLoginWeb = document.getElementById("ingresoSesion");
 
-    formLoginWeb.addEventListener("submit", (e) => {
-        e.preventDefault();
-        console.log(e.target.children[2].children[1].value)
-        if (chequeoDatos(e.target.children[1].children[1].value,e.target.children[2].children[1].value) === false){
-            DivFormulario.innerHTML = formLoginError
-        }
-        
-    });
+        formLoginWeb.addEventListener("submit", (e) => {
+            e.preventDefault();
+            console.log(e.target.children[2].children[1].value)
+            if (chequeoDatos(e.target.children[1].children[1].value,e.target.children[2].children[1].value) === false){
+                DivFormulario.innerHTML = formLoginError
+            }
+
+        });
+    } else {
+        init();
+    }
+    
 }
 
 function init() {
@@ -554,33 +559,33 @@ function tablaResultados(){
 function aniadirRegistro(registro) {
     if (chequeoOnline() === false){
         login();
+    } else {
+        let registros = JSON.parse(localStorage.getItem("registros")) || [];
+        registros.push(registro);
+        localStorage.setItem("registros", JSON.stringify(registros));
+        console.log(`Actualizando registros`);
     }
-    let registros = JSON.parse(localStorage.getItem("registros"));
-    if (registros === null) {
-        registros = [];
-    }
-    registros.push(registro);
-    localStorage.setItem("registros", JSON.stringify(registros));
-    console.log(`Actualizando registros`);
+    
 }
 
 function eliminarRegistro(registro) {
     if (chequeoOnline() === false){
         login();
+    } else {
+        let registros = JSON.parse(localStorage.getItem("registros"));
+        let index = registros.indexOf(registro);
+        console.log(registros.splice((index),1));
+        localStorage.setItem("registros", JSON.stringify(registros));
+        console.log(`Actualizando registros`);
     }
-    let registros = JSON.parse(localStorage.getItem("registros"));
-    let index = registros.indexOf(registro);
-    console.log(registros.splice((index),1));
-    localStorage.setItem("registros", JSON.stringify(registros));
-    console.log(`Actualizando registros`);
 }
 
 function obtenerRegistros(){
     if (chequeoOnline() === false){
         login();
     }
-    let registros = JSON.parse(localStorage.getItem("registros"));
-    if (registros === null || registros.length === 0) {
+    let registros = JSON.parse(localStorage.getItem("registros")) || [];
+    if (registros.length === 0) {
 
         DivFormulario.innerHTML = `
         <p class="text-center">
@@ -683,164 +688,166 @@ function obtenerRegistros(){
 function imprimirRegistro(registro){
     if (chequeoOnline() === false){
         login();
-    }
-    limiparPantalla();
-    total = 0;
-    let informacion = JSON.parse(localStorage.getItem(registro));
-
-    if (informacion === null || informacion.length === 0) {
-
-        DivFormulario.innerHTML = `
-        <p class="text-center">
-            <h3>Parece que el registro que estas buscando no se encuentra.</h3>
-            </br>
-            <button type="button" class="btn btn-danger mt-3" id="btnAtrasRegitros">Atras</button>
-        </p>`;
-        let btnAtrasRegitros = document.getElementById("btnAtrasRegitros");
-
-        btnAtrasRegitros.addEventListener("click", (e) => {
-            limiparPantalla();
-            init();
-        });
-
     } else {
-        let fechaHumana = new Date(parseInt(registro));
-        const opciones = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric' };
-        let fechaImpresion = fechaHumana.toLocaleDateString(undefined,opciones)
+        limiparPantalla();
+        total = 0;
+        let informacion = JSON.parse(localStorage.getItem(registro)) || [];
 
-        let aprobacion = document.createElement("p");
-        aprobacion.innerHTML = `
-        <div class="d-flex justify-content-end float-end pt-2">
-            <form class="d-flex mx-2" id="busqueda">
-                <input class="form-control me-2" type="search" placeholder="Búsqueda" aria-label="Buscar">
-                <button class="btn btn-outline-success" type="submit">Buscar</button>
-            </form>
-            <div class="btn-group">
-                <button type="button" class="btn btn-danger dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                    ${usuarioPanel}
-                </button>
-                <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" id="btnCerrarSesion">Cerrar sesión</a></li>
-                </ul>
+        if (informacion.length === 0) {
+
+            DivFormulario.innerHTML = `
+            <p class="text-center">
+                <h3>Parece que el registro que estas buscando no se encuentra.</h3>
+                </br>
+                <button type="button" class="btn btn-danger mt-3" id="btnAtrasRegitros">Atras</button>
+            </p>`;
+            let btnAtrasRegitros = document.getElementById("btnAtrasRegitros");
+
+            btnAtrasRegitros.addEventListener("click", (e) => {
+                limiparPantalla();
+                init();
+            });
+
+        } else {
+            let fechaHumana = new Date(parseInt(registro));
+            const opciones = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric' };
+            let fechaImpresion = fechaHumana.toLocaleDateString(undefined,opciones)
+
+            let aprobacion = document.createElement("p");
+            aprobacion.innerHTML = `
+            <div class="d-flex justify-content-end float-end pt-2">
+                <form class="d-flex mx-2" id="busqueda">
+                    <input class="form-control me-2" type="search" placeholder="Búsqueda" aria-label="Buscar">
+                    <button class="btn btn-outline-success" type="submit">Buscar</button>
+                </form>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-danger dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                        ${usuarioPanel}
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" id="btnCerrarSesion">Cerrar sesión</a></li>
+                    </ul>
+                </div>
             </div>
-        </div>
-        <nav aria-label="breadcrumb" class="pt-3">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="#" id="vovlerInicio">Inicio</a></li>
-                <li class="breadcrumb-item"><a href="#" id="volverRegistros">Registros</a></li>
-                <li class="breadcrumb-item active" aria-current="page">${registro}</li>
-            </ol>
-        </nav>
-        ${mensajeErrorBusquedaProfesor}
-        <h5 class="float-start pt-3" >Nota de aprobación: ${informacion[0].notaAprobacion}<h5>
-        <h5 class="float-end pt-3">Generado el dia ${fechaImpresion}</h5></br></br>
-        <h5 class="float-start " >Curso: ${informacion[0].curso}<h5>
-        <h5 class="float-end ">Profesor: ${informacion[0].profesor}</h5></br></br>`;
-        padre.appendChild(aprobacion);
+            <nav aria-label="breadcrumb" class="pt-3">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="#" id="vovlerInicio">Inicio</a></li>
+                    <li class="breadcrumb-item"><a href="#" id="volverRegistros">Registros</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">${registro}</li>
+                </ol>
+            </nav>
+            ${mensajeErrorBusquedaProfesor}
+            <h5 class="float-start pt-3" >Nota de aprobación: ${informacion[0].notaAprobacion}<h5>
+            <h5 class="float-end pt-3">Generado el dia ${fechaImpresion}</h5></br></br>
+            <h5 class="float-start " >Curso: ${informacion[0].curso}<h5>
+            <h5 class="float-end ">Profesor: ${informacion[0].profesor}</h5></br></br>`;
+            padre.appendChild(aprobacion);
 
-        let tabla = document.createElement('div');
-        tabla.innerHTML = tablaAlumnos;
-        padre.appendChild(tabla);
+            let tabla = document.createElement('div');
+            tabla.innerHTML = tablaAlumnos;
+            padre.appendChild(tabla);
 
-        let tablaPadre = document.getElementById("alumnos");
+            let tablaPadre = document.getElementById("alumnos");
 
-        for (i=0;i <= (informacion[0].data.length - 1); i++) {
-            console.log("Imprimiendo el Id:" + informacion[0].data[i].id + ", Nombre:"+ informacion[0].data[i].nombre + " " + informacion[0].data[i].apellido + ", Nota: "+ informacion[0].data[i].nota + ", Estado: " + informacion[0].data[i].aprobado);
-            total = suma(parseFloat(informacion[0].data[i].nota),total);
-            let tr = document.createElement("tr");
-            if (informacion[0].data[i].aprobado) {
-                tr.innerHTML = `<th scope="row">${informacion[0].data[i].id}</th>
-                <td>${informacion[0].data[i].nombre}</td>
-                <td>${informacion[0].data[i].apellido}</td>
-                <td>${informacion[0].data[i].nota}</td>
-                <td>✅</td>`;
-            } else {
-                tr.innerHTML = `<th scope="row">${informacion[0].data[i].id}</th>
-                <td>${informacion[0].data[i].nombre}</td>
-                <td>${informacion[0].data[i].apellido}</td>
-                <td>${informacion[0].data[i].nota}</td>
-                <td>❌</td>`;
+            for (i=0;i <= (informacion[0].data.length - 1); i++) {
+                console.log("Imprimiendo el Id:" + informacion[0].data[i].id + ", Nombre:"+ informacion[0].data[i].nombre + " " + informacion[0].data[i].apellido + ", Nota: "+ informacion[0].data[i].nota + ", Estado: " + informacion[0].data[i].aprobado);
+                total = suma(parseFloat(informacion[0].data[i].nota),total);
+                let tr = document.createElement("tr");
+                if (informacion[0].data[i].aprobado) {
+                    tr.innerHTML = `<th scope="row">${informacion[0].data[i].id}</th>
+                    <td>${informacion[0].data[i].nombre}</td>
+                    <td>${informacion[0].data[i].apellido}</td>
+                    <td>${informacion[0].data[i].nota}</td>
+                    <td>✅</td>`;
+                } else {
+                    tr.innerHTML = `<th scope="row">${informacion[0].data[i].id}</th>
+                    <td>${informacion[0].data[i].nombre}</td>
+                    <td>${informacion[0].data[i].apellido}</td>
+                    <td>${informacion[0].data[i].nota}</td>
+                    <td>❌</td>`;
+                }
+                tablaPadre.appendChild(tr);
             }
-            tablaPadre.appendChild(tr);
+
+            let promedio = promediar(total,informacion[0].data.length).toFixed(2);
+
+            let promedioFinal = document.createElement('div');
+            promedioFinal.innerHTML = `<h5 class="float-start my-3">Promedio general: ${promedio}<h5>
+            <button type="button" class="btn btn-danger float-end my-3 mx-1" id="btnEliminarReg">Eliminar Registro</button>
+            <button type="button" class="btn btn-success float-end my-3 mx-1" id="Inicio">Inicio</button>
+            <button type="button" class="btn btn-primary float-end my-3 mx-1" id="btnIrRegistros">Atras</button></br></br>`;
+            padre.appendChild(promedioFinal);
+
+            let compartir = document.createElement('div');
+            compartir.innerHTML = `<h5 class="my-3" style="font-weight: 300;">Hash: <a href="${window.location.origin}${window.location.pathname}?main&hash=${registro}">${registro}</a>, link para compartir.</br></br> <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${window.location.origin}${window.location.pathname}%3Fmain%26hash=${registro}"/><h5>`;
+            padre.appendChild(compartir);
+
+            let btnEliminarReg = document.getElementById("btnEliminarReg");
+            btnEliminarReg.addEventListener("click", (e) => {
+                limiparPantalla();
+                let confirmacion = confirm("Desea Eliminar el registro?")
+                if (confirmacion) {
+                    let divEliminacion = document.createElement('div');
+                    divEliminacion.innerHTML = `<p class="text-center"><h3>Registro hash ${registro}, fue eliminado.</h3></br><button type="button" class="btn btn-danger" id="btnAtrasEliminar">Atras</button></p>`;
+                    padre.appendChild(divEliminacion);
+
+                    localStorage.removeItem(registro);
+                    eliminarRegistro(registro);
+
+                    let btnAtrasEliminar = document.getElementById("btnAtrasEliminar");
+                    btnAtrasEliminar.addEventListener("click", (e) => {
+                        limiparPantalla();
+                        obtenerRegistros();
+                    });
+                }
+            });
+
+            let btnInicio = document.getElementById("Inicio");
+            btnInicio.addEventListener("click", (e) => {
+                limiparPantalla();
+                init();
+            });
+
+            let btnIrRegistros = document.getElementById("btnIrRegistros");
+            btnIrRegistros.addEventListener("click", (e) => {
+                limiparPantalla();
+                obtenerRegistros();
+            });
+
+            let vovlerInicio = document.getElementById("vovlerInicio");
+            vovlerInicio.addEventListener("click", (e) => {
+                limiparPantalla();
+                init();
+            });
+
+            let volverRegistros = document.getElementById("volverRegistros");
+            volverRegistros.addEventListener("click", (e) => {
+                limiparPantalla();
+                obtenerRegistros();
+            });
+
+            let btnCerrarSesion = document.getElementById("btnCerrarSesion");
+            btnCerrarSesion.addEventListener("click", (e) => {
+                cerrarSesion();
+            });
+
+            let formLogin = document.getElementById("busqueda");
+
+            formLogin.addEventListener("submit", (e) => {
+            e.preventDefault();
+            busquedaProfesor(e.target.children[0].value,registro);
+            });
         }
-
-        let promedio = promediar(total,informacion[0].data.length).toFixed(2);
-
-        let promedioFinal = document.createElement('div');
-        promedioFinal.innerHTML = `<h5 class="float-start my-3">Promedio general: ${promedio}<h5>
-        <button type="button" class="btn btn-danger float-end my-3 mx-1" id="btnEliminarReg">Eliminar Registro</button>
-        <button type="button" class="btn btn-success float-end my-3 mx-1" id="Inicio">Inicio</button>
-        <button type="button" class="btn btn-primary float-end my-3 mx-1" id="btnIrRegistros">Atras</button></br></br>`;
-        padre.appendChild(promedioFinal);
-
-        let compartir = document.createElement('div');
-        compartir.innerHTML = `<h5 class="my-3" style="font-weight: 300;">Hash: <a href="${window.location.origin}${window.location.pathname}?main&hash=${registro}">${registro}</a>, link para compartir.</br></br> <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${window.location.origin}${window.location.pathname}%3Fmain%26hash=${registro}"/><h5>`;
-        padre.appendChild(compartir);
-
-        let btnEliminarReg = document.getElementById("btnEliminarReg");
-        btnEliminarReg.addEventListener("click", (e) => {
-            limiparPantalla();
-            let confirmacion = confirm("Desea Eliminar el registro?")
-            if (confirmacion) {
-                let divEliminacion = document.createElement('div');
-                divEliminacion.innerHTML = `<p class="text-center"><h3>Registro hash ${registro}, fue eliminado.</h3></br><button type="button" class="btn btn-danger" id="btnAtrasEliminar">Atras</button></p>`;
-                padre.appendChild(divEliminacion);
-
-                localStorage.removeItem(registro);
-                eliminarRegistro(registro);
-
-                let btnAtrasEliminar = document.getElementById("btnAtrasEliminar");
-                btnAtrasEliminar.addEventListener("click", (e) => {
-                    limiparPantalla();
-                    obtenerRegistros();
-                });
-            }
-        });
-
-        let btnInicio = document.getElementById("Inicio");
-        btnInicio.addEventListener("click", (e) => {
-            limiparPantalla();
-            init();
-        });
-
-        let btnIrRegistros = document.getElementById("btnIrRegistros");
-        btnIrRegistros.addEventListener("click", (e) => {
-            limiparPantalla();
-            obtenerRegistros();
-        });
-
-        let vovlerInicio = document.getElementById("vovlerInicio");
-        vovlerInicio.addEventListener("click", (e) => {
-            limiparPantalla();
-            init();
-        });
-
-        let volverRegistros = document.getElementById("volverRegistros");
-        volverRegistros.addEventListener("click", (e) => {
-            limiparPantalla();
-            obtenerRegistros();
-        });
-
-        let btnCerrarSesion = document.getElementById("btnCerrarSesion");
-        btnCerrarSesion.addEventListener("click", (e) => {
-            cerrarSesion();
-        });
-
-        let formLogin = document.getElementById("busqueda");
-
-        formLogin.addEventListener("submit", (e) => {
-        e.preventDefault();
-        busquedaProfesor(e.target.children[0].value,registro);
-        });
     }
+ 
 } 
 
 function compartirRegistro(registro) {
     limiparPantalla();
     total = 0;
-    let informacion = JSON.parse(localStorage.getItem(registro));
+    let informacion = JSON.parse(localStorage.getItem(registro)) || [];
 
-    if (informacion === null || informacion == []){
+    if (informacion.length === 0){
         let mensajeError = document.createElement("div");
         mensajeError.innerHTML = `
         <p class="text-center">
@@ -1682,9 +1689,7 @@ const consultaHash = parametros.get('consulta');
 if (/^([0-9]{13})$/.test(hashUrl)) {
     compartirRegistro(hashUrl);
 }else if (/^([0-9]{13})$/.test(consultaHash)) {
-    if (chequeoOnline()){
-        imprimirRegistro(consultaHash);
-    }
+    imprimirRegistro(consultaHash);
 }else{
     if (chequeoOnline()){
         init();
