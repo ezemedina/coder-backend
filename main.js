@@ -1468,7 +1468,7 @@ function imprimirListadoBusqueda(registro){
         <div>
         <h6>Filtro búsqueda:
             <button type="button" class="mx-1" style="background-color: white;border-radius: 5px;border-color: gray;" id="btnBorrarFiltro">
-            hash: ${registro}
+            Hash: ${registro}
                 <span class="badge" style="color: #000;">X</span>
             </button>
         </h6>
