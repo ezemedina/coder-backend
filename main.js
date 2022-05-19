@@ -17,7 +17,7 @@ const formLogin = `
         </div>
         <div class="input-group my-3">
             <span class="input-group-text" id="basic-addon1"><i class="bi bi-key-fill"></i></span>
-            <input type="text" class="form-control" placeholder="Contraseña" required>
+            <input type="password" class="form-control" placeholder="Contraseña" required>
         </div>
         <div id="error"></div>
         <button type="submit" class="btn btn-primary">Iniciar sesión</button>
