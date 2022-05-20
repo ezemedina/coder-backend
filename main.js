@@ -20,7 +20,12 @@ const formLogin = `
             <input type="password" class="form-control" placeholder="Contraseña" required>
         </div>
         <div id="error"></div>
-        <button type="submit" class="btn btn-primary">Iniciar sesión</button>
+        
+        <button type="submit" class="btn btn-primary" id="btnIniciarSesion" >Iniciar sesión</button></br>
+        <button class="btn btn-primary invisible" type="button" id="btnIniciarSesionCarga" disabled>
+          <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+          Iniciar sesión
+        </button>
     </form>
 </div>`;
 
@@ -226,51 +231,95 @@ let promediar = operacion("/");
 
 function cerrarSesion() {
     const credenciales = [];
-    sessionStorage.setItem("usuario", JSON.stringify(credenciales));
+    sessionStorage.setItem("credenciales", JSON.stringify(credenciales));
     usuarioPanel = "";
     login();
 }
 
+async function obtenerKey() {
+    const response = await fetch(
+      "https://6286699396bccbf32d74c7a5.mockapi.io/api/v1/key"
+    );
+    const data = await response.json();
+    return data;
+}
+  
+async function passwordCheck(clave, claveEnc) {
+    const data = await obtenerKey();
+    const key = CryptoJS.enc.Hex.parse(data[0].key);
+    const iv = CryptoJS.enc.Hex.parse(data[0].iv);
+    let encrypted = CryptoJS.AES.encrypt(clave, key, { iv: iv });
+    if (encrypted.toString() === claveEnc) {
+      return true;
+    } else {
+      return false;
+    }
+}
+
 function chequeoOnline() {
-    let usuarioSesion = JSON.parse(sessionStorage.getItem("usuario")) || [];
+    let usuarioSesion = JSON.parse(sessionStorage.getItem("credenciales")) || [];
     if (usuarioSesion.length === 0){
         return false;
     } else {
-        usuarioPanel = usuarioSesion[0];
+        usuarioPanel = usuarioSesion[0].usuario;
         return true
     }
 }
 
-function chequeoDatos(usuario,clave){
-    if (usuario === "admin" || clave === "admin") {
-        const credenciales = [usuario,clave];
-        sessionStorage.setItem("usuario", JSON.stringify(credenciales));
-        usuarioPanel = usuario;
-        init();
-        return true;
+async function loginApi(usuario, clave) {
+    let sesion = [];
+    const response = await fetch(
+      "https://6286699396bccbf32d74c7a5.mockapi.io/api/v1/user"
+    );
+    const data = await response.json();
+    for (let i = 0; i <= data.length - 1; i++) {
+      if (usuario === data[i].username) {
+        usuarioPanel = data[i].firstName + " " + data[i].lastName;
+        if (await passwordCheck(clave, data[i].password)) {
+          sesion.push({
+            id: data[i].id,
+            usuario: usuarioPanel,
+            username: data[i].username
+          });
+          let sesionJSON = JSON.stringify(sesion);
+          sessionStorage.setItem("credenciales",sesionJSON);
+        }
+      }
+    }
+    if (sesion.length === 0){
+      console.log("Usuario no encontrado o contraseña incorrecta");
+      return false;
     } else {
-        return false;
+      return true;
     }
 }
 
 function login() {
     if (chequeoOnline() === false){
-        console.log(chequeoOnline());
         limiparPantalla();
         DivFormulario.innerHTML = formLogin
         let formLoginWeb = document.getElementById("ingresoSesion");
+        let btnIniciarSesion = document.getElementById("btnIniciarSesion")
+        let btnIniciarSesionCarga = document.getElementById("btnIniciarSesionCarga")
 
         formLoginWeb.addEventListener("submit", (e) => {
             e.preventDefault();
-            if (chequeoDatos(e.target.children[1].children[1].value,e.target.children[2].children[1].value) === false){
-                let errorDiv = document.getElementById("error");
-                errorDiv.innerHTML = formLoginError
-            }
+            btnIniciarSesion.classList.add("invisible");
+            btnIniciarSesionCarga.classList.remove("invisible");
+            loginApi(e.target.children[1].children[1].value,e.target.children[2].children[1].value).then(ret => {
+                if (ret === true) {
+                    init();
+                } else {
+                    btnIniciarSesion.classList.remove("invisible");
+                    btnIniciarSesionCarga.classList.add("invisible");
+                    let errorDiv = document.getElementById("error");
+                    errorDiv.innerHTML = formLoginError
+                }
+            });
         });
     } else {
         init();
     }
-    
 }
 
 function init() {
