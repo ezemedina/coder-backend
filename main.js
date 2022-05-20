@@ -5,6 +5,8 @@ let cursoDictado = "";
 let profesorCurso = "";
 let usuarioPanel = "";
 
+let encrypted2 = "";
+
 let Alumnos = [];
 
 const formLogin = `
@@ -20,14 +22,20 @@ const formLogin = `
             <input type="password" class="form-control" placeholder="Contraseña" required>
         </div>
         <div id="error"></div>
-        
-        <button type="submit" class="btn btn-primary" id="btnIniciarSesion" >Iniciar sesión</button></br>
-        <button class="btn btn-primary invisible" type="button" id="btnIniciarSesionCarga" disabled>
-          <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
-          Iniciar sesión
-        </button>
+        <div id="btnInicarSesion"></div>
     </form>
 </div>`;
+
+const btnInicarSesionNormal = `
+<button type="submit" class="btn btn-primary" id="btnIniciarSesion" >Iniciar sesión</button>
+`;
+
+const btnInicarSesionCarga = `
+<button class="btn btn-primary" type="button" id="btnIniciarSesionCarga" disabled>
+  <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+  Iniciar sesión
+</button>
+`;
 
 const formLoginError = `
 <div class="alert alert-danger" role="alert">
@@ -299,19 +307,17 @@ function login() {
         limiparPantalla();
         DivFormulario.innerHTML = formLogin
         let formLoginWeb = document.getElementById("ingresoSesion");
-        let btnIniciarSesion = document.getElementById("btnIniciarSesion")
-        let btnIniciarSesionCarga = document.getElementById("btnIniciarSesionCarga")
+        let btnInicarSesion = document.getElementById("btnInicarSesion")
+        btnInicarSesion.innerHTML = btnInicarSesionNormal;
 
         formLoginWeb.addEventListener("submit", (e) => {
             e.preventDefault();
-            btnIniciarSesion.classList.add("invisible");
-            btnIniciarSesionCarga.classList.remove("invisible");
+            btnInicarSesion.innerHTML = btnInicarSesionCarga;
             loginApi(e.target.children[1].children[1].value,e.target.children[2].children[1].value).then(ret => {
                 if (ret === true) {
                     init();
                 } else {
-                    btnIniciarSesion.classList.remove("invisible");
-                    btnIniciarSesionCarga.classList.add("invisible");
+                    btnInicarSesion.innerHTML = btnInicarSesionNormal;
                     let errorDiv = document.getElementById("error");
                     errorDiv.innerHTML = formLoginError
                 }
