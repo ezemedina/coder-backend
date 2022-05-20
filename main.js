@@ -968,7 +968,7 @@ function compartirRegistro(registro) {
         let promedio = promediar(total,informacion[0].data.length).toFixed(2);
 
         let promedioFinal = document.createElement('div');
-        promedioFinal.innerHTML = `<h5 class="float-start my-3">Promedio generprial: ${promedio}<h5>
+        promedioFinal.innerHTML = `<h5 class="float-start my-3">Promedio general: ${promedio}<h5>
         <button type="button" class="btn btn-success float-end my-3 mx-1" id="btnSalir">Salir</button>`;
         padre.appendChild(promedioFinal);
 
@@ -1077,6 +1077,14 @@ function compartirRegistroBusqueda(busqueda,hash) {
             limiparPantalla();
             imprimirRegistro(hash);
         });
+        
+        let btnBorrarFiltro = document.getElementById("btnBorrarFiltro");
+        btnBorrarFiltro.addEventListener("click", (e) => {
+            limiparPantalla();
+            console.log(`Regresando al registros: ${hash}`)
+            compartirRegistro(hash);
+        });
+        
     }else {
         let tabla = document.createElement('div');
         tabla.innerHTML = tablaAlumnos;
@@ -1202,6 +1210,13 @@ function busquedaNombreApellido(busqueda,hash) {
         let btnSalir = document.getElementById("btnVolver");
         btnSalir.addEventListener("click", (e) => {
             limiparPantalla();
+            imprimirRegistro(hash);
+        });
+        
+        let btnBorrarFiltro = document.getElementById("btnBorrarFiltro");
+        btnBorrarFiltro.addEventListener("click", (e) => {
+            limiparPantalla();
+            console.log(`Regresando al registros: ${hash}`)
             imprimirRegistro(hash);
         });
     }else {
@@ -1496,6 +1511,7 @@ function imprimirListadoBusqueda(registro){
             </br>
             <button type="button" class="btn btn-danger" id="btnAtrasRegitros">Atras</button>
         </p>`;
+        
         let btnAtrasRegitros = document.getElementById("btnAtrasRegitros");
 
         btnAtrasRegitros.addEventListener("click", (e) => {
