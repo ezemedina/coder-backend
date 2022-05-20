@@ -5,8 +5,6 @@ let cursoDictado = "";
 let profesorCurso = "";
 let usuarioPanel = "";
 
-let encrypted2 = "";
-
 let Alumnos = [];
 
 const formLogin = `
@@ -1075,7 +1073,7 @@ function compartirRegistroBusqueda(busqueda,hash) {
         let btnSalir = document.getElementById("btnVolver");
         btnSalir.addEventListener("click", (e) => {
             limiparPantalla();
-            imprimirRegistro(hash);
+            compartirRegistro(hash);
         });
         
         let btnBorrarFiltro = document.getElementById("btnBorrarFiltro");
