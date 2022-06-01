@@ -40,6 +40,20 @@ const formLoginError = `
     Usuario o clave incorrecto
 </div>`;
 
+const mensajeErrorIngresoRegistros = `
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <i class="bi bi-exclamation-triangle-fill mx-1 link-warning"></i>
+            <strong class="me-auto">Error General</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+            No se encontraron alumnos en el registro</br>
+        </div>
+    </div>
+</div>`;
+
 const mensajeErrorBusquedaAlumnos = `
 <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
     <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
@@ -447,6 +461,7 @@ function datosAlumnos(usuariosIngresados){
             <li class="breadcrumb-item active" aria-current="page">Ingesta de datos</li>
         </ol>
     </nav>
+    ${mensajeErrorIngresoRegistros}
     <form id="formAlumno" class="my-3 was-validated"></form>`;
 
     let padreAlumnos = document.getElementById("formAlumno");
@@ -470,16 +485,20 @@ function datosAlumnos(usuariosIngresados){
 
     formularioAlumno.addEventListener("submit", (e) => {
         e.preventDefault();
-        for (i=0; i <= (cantidad-1); i++){
-            console.log(e.target.children[1].children[0].children[i].children[1].children[1].children[0].children[1].value);
-            let nombreAlumno = e.target.children[1].children[0].children[i].children[1].children[0].children[0].children[1].value;
-            let apellidoAlumno = e.target.children[1].children[0].children[i].children[1].children[1].children[0].children[1].value;
-            let notaAlumno = e.target.children[1].children[0].children[i].children[1].children[2].children[0].children[1].value;
-            console.log(`Generando alumno ${(i+1)}:\n   - Nombre: ${nombreAlumno} \n   - Apellido: ${apellidoAlumno}\n   - Nota: ${notaAlumno}`);
-            Alumnos.push(new Alumno(i,(i+1),nombreAlumno,apellidoAlumno,notaAlumno));
+        if (cantidad >= 1){
+            for (i=0; i <= (cantidad-1); i++){
+                console.log(e.target.children[1].children[0].children[i].children[1].children[1].children[0].children[1].value);
+                let nombreAlumno = e.target.children[1].children[0].children[i].children[1].children[0].children[0].children[1].value;
+                let apellidoAlumno = e.target.children[1].children[0].children[i].children[1].children[1].children[0].children[1].value;
+                let notaAlumno = e.target.children[1].children[0].children[i].children[1].children[2].children[0].children[1].value;
+                console.log(`Generando alumno ${(i+1)}:\n   - Nombre: ${nombreAlumno} \n   - Apellido: ${apellidoAlumno}\n   - Nota: ${notaAlumno}`);
+                Alumnos.push(new Alumno(i,(i+1),nombreAlumno,apellidoAlumno,notaAlumno));
+            }
+            limiparPantalla();
+            tablaResultados();
+        } else {
+            tiggerToast();
         }
-        limiparPantalla();
-        tablaResultados();
     });
 
     let btnAtras = document.getElementById("atrasAlumno");
